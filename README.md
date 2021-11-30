@@ -6,7 +6,7 @@ Server: ./server #port
 
 Client: ./client data.cs.purdue.edu #port
 
-For client type: SEND PUBLIC KEY
+For client type: SENDING PUBLIC KEY
 
 For Server type any message over 10 characters long.
 
