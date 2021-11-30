@@ -14,6 +14,8 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <fstream>
+#include<math.h>
+#include "algorithm.c"
 using namespace std;
 //Client side
 int main(int argc, char *argv[])
@@ -46,6 +48,12 @@ int main(int argc, char *argv[])
     int bytesRead, bytesWritten = 0;
     struct timeval start1, end1;
     gettimeofday(&start1, NULL);
+
+    int q = (int)(pow(10,4));
+    int g = rand()%(q-2+1)+2;
+    int a = gen_key(q);
+    int h = power(g,a,q);
+
     while(1)
     {
         cout << ">";
@@ -53,15 +61,36 @@ int main(int argc, char *argv[])
         getline(cin, data);
         memset(&msg, 0, sizeof(msg));//clear the buffer
         strcpy(msg, data.c_str());
+
+        if(data == "SENDING PUBLIC KEY") {
+          bytesWritten += send(clientSd, &q, sizeof(q),0);
+          bytesWritten += send(clientSd, &g, sizeof(g),0);
+          bytesWritten += send(clientSd, &h, sizeof(h),0);
+        }
+
+
+        encrypted_message t;
+        if(recv(clientSd, &t, sizeof(t), 0)) {
+          decrypt(t,a,q);
+        }
+
+
+
         if(data == "exit")
         {
             send(clientSd, (char*)&msg, strlen(msg), 0);
             break;
         }
-        bytesWritten += send(clientSd, (char*)&msg, strlen(msg), 0);
-        cout << "Awaiting server response..." << endl;
+        //int a = 2;
+
+        //bytesWritten += send(clientSd, &a, sizeof(a), 0);
+        
+
+        //cout << "Awaiting server response..." << endl;
         memset(&msg, 0, sizeof(msg));//clear the buffer
-        bytesRead += recv(clientSd, (char*)&msg, sizeof(msg), 0);
+        //bytesRead += recv(clientSd, (char*)&msg, sizeof(msg), 0);
+        
+
         if(!strcmp(msg, "exit"))
         {
             cout << "Server has quit the session" << endl;

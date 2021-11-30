@@ -14,6 +14,7 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 #include <fstream>
+#include "algorithm.c"
 using namespace std;
 //Server side
 int main(int argc, char *argv[])
@@ -78,7 +79,19 @@ int main(int argc, char *argv[])
         //receive a message from the client (listen)
         cout << "Awaiting client response..." << endl;
         memset(&msg, 0, sizeof(msg));//clear the buffer
-        bytesRead += recv(newSd, (char*)&msg, sizeof(msg), 0);
+        int q;
+        int g;
+        int h;
+        bytesRead += recv(newSd, &q, sizeof(q), 0);
+        bytesRead += recv(newSd, &g, sizeof(g), 0);
+        bytesRead += recv(newSd, &h, sizeof(h), 0);
+
+        //if(strlen(data) >= 10) {
+          //encrypted_message t = encrypt(data, q, h, g);
+          //send(newSd, &t, sizeof(t), 0);
+        //}
+
+
         if(!strcmp(msg, "exit"))
         {
             cout << "Client has quit the session" << endl;
@@ -90,6 +103,12 @@ int main(int argc, char *argv[])
         getline(cin, data);
         memset(&msg, 0, sizeof(msg)); //clear the buffer
         strcpy(msg, data.c_str());
+        encrypted_message e = encrypt((char*)(data.c_str()), q, h, g);
+
+        if(strlen(data.c_str()) >=10) {
+          bytesWritten += send(newSd, &e, sizeof(e), 0);
+        }
+
         if(data == "exit")
         {
             //send to the client that server has closed the connection
@@ -97,7 +116,7 @@ int main(int argc, char *argv[])
             break;
         }
         //send the message to client
-        bytesWritten += send(newSd, (char*)&msg, strlen(msg), 0);
+        //bytesWritten += send(newSd, (char*)&msg, strlen(msg), 0);
     }
     //we need to close the socket descriptors after we're all done
     gettimeofday(&end1, NULL);
